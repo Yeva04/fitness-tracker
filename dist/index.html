@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fitness Tracker - Login</title>
+  <link rel="icon" type="image/png" href="/favicon2.png" />
+  <script type="module" crossorigin src="/assets/main-Dw_rofdB.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/utils-Co-rGlb8.js">
+  <link rel="stylesheet" crossorigin href="/assets/utils-B4WLdwGW.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="/favicon2.png" alt="Fitness Tracker Logo" width="40" height="40" />
+      <h1>MyFitLife</h1>
+    </div>
+    <div class="header-image">
+      <img src="/logo.png" alt="Header Image" width="40" height="40" />
+    </div>
+  </header>
+  <main>
+    <section id="login-section">
+      <h2>Welcome to MyFitLife!</h2>
+      <p>Track your fitness journey with ease.</p>
+      <form id="login-form">
+        <label for="login-username">Username:</label>
+        <input type="text" id="login-username" placeholder="Enter username" required />
+        <label for="login-email">Email:</label>
+        <input type="email" id="login-email" placeholder="Enter email" required />
+        <button type="submit" class="btn">Login</button>
+        <p>Don't have an account? <button type="button" id="show-signup" class="btn-link">Sign Up</button></p>
+      </form>
+    </section>
+    <div id="signup-modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <h3>Sign Up</h3>
+        <form id="signup-form">
+          <label for="signup-username">Username:</label>
+          <input type="text" id="signup-username" placeholder="Enter username" required />
+          <label for="signup-email">Email:</label>
+          <input type="email" id="signup-email" placeholder="Enter email" required />
+          <label for="signup-gender">Gender:</label>
+          <select id="signup-gender" required>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+          <label for="signup-height">Height (cm):</label>
+          <input type="number" id="signup-height" placeholder="e.g., 170" min="100" max="250" required />
+          <label for="signup-weight">Weight (kg):</label>
+          <input type="number" id="signup-weight" placeholder="e.g., 70" min="30" max="200" required />
+          <button type="submit" class="btn">Sign Up</button>
+        </form>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <p>&copy; 2025 Personal Fitness Tracker</p>
+  </footer>
+</body>
+</html>

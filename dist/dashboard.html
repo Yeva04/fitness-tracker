@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fitness Tracker - Dashboard</title>
+  <link rel="icon" type="image/png" href="/favicon2.png" />
+  <script type="module" crossorigin src="/assets/dashboard-CMBGMBRU.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/utils-Co-rGlb8.js">
+  <link rel="stylesheet" crossorigin href="/assets/utils-B4WLdwGW.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="/logo.png" alt="Fitness Tracker Logo" width="40" height="40" />
+      <h1>MyFitLife</h1>
+    </div>
+    <button class="hamburger" aria-label="Toggle menu">☰</button>
+    <nav class="nav-menu">
+      <button id="nav-workout" class="active">Workout</button>
+      <button id="nav-nutrition">Nutrition</button>
+      <button id="nav-goals">Goals</button>
+      <button id="nav-dashboard">Dashboard</button>
+    </nav>
+  </header>
+  <main>
+    <section id="workout-section">
+      <h2>Workout Log</h2>
+      <form id="workout-form">
+        <label for="exercise-name">Exercise:</label>
+        <input type="text" id="exercise-name" placeholder="e.g., Running" required />
+        <label for="exercise-time">Time (minutes):</label>
+        <input type="number" id="exercise-time" placeholder="e.g., 30" min="0" required />
+        <label for="exercise-reps">Reps (if applicable):</label>
+        <input type="number" id="exercise-reps" placeholder="e.g., 10" min="0" />
+        <button type="submit">Add</button>
+      </form>
+      <ul class="workout-entries"></ul>
+    </section>
+    <section id="nutrition-section" class="hidden">
+      <h2>Nutrition Tracker</h2>
+      <form id="nutrition-form">
+        <label for="food-name">Food:</label>
+        <input type="text" id="food-name" placeholder="e.g., Apple" required />
+        <button type="submit">Add</button>
+      </form>
+      <ul class="nutrition-entries"></ul>
+    </section>
+    <section id="goals-section" class="hidden">
+      <h2>Goal Setting</h2>
+      <form id="goal-form">
+        <label for="goal-type">Goal Type:</label>
+        <select id="goal-type" required>
+          <option value="workout">Workouts per Week</option>
+          <option value="calories">Daily Calories</option>
+          <option value="fitness-goal">Fitness Goal</option>
+        </select>
+        <label for="goal-value">Target:</label>
+        <input type="number" id="goal-value" placeholder="e.g., 3 or 2000" min="0" class="hidden goal-value" />
+        <select id="fitness-goal-value" class="hidden">
+          <option value="fat-burning">Fat Burning</option>
+          <option value="muscle-building">Muscle Building</option>
+        </select>
+        <button type="submit">Set Goal</button>
+      </form>
+      <ul class="goal-entries"></ul>
+    </section>
+    <section id="dashboard-section" class="hidden">
+      <h2>Progress Dashboard</h2>
+      <canvas id="progress-chart"></canvas>
+      <table id="progress-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Workouts</th>
+            <th>Calories Consumed</th>
+            <th>Protein (g)</th>
+            <th>Workout Calories Burned</th>
+            <th>Steps</th>
+            <th>Strava Calories Burned</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <button id="export-data">Export Data</button>
+      <button id="fetch-strava">Fetch Strava Data</button>
+      <div id="suggestions">
+        <h3>Activity Suggestions</h3>
+        <ul id="suggestion-list"></ul>
+      </div>
+    </section>
+    <div id="milestone-modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <p id="milestone-message">Congratulations! Goal achieved!</p>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <p>&copy; 2025 Personal Fitness Tracker</p>
+  </footer>
+</body>
+</html>

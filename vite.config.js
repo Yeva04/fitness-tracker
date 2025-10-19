@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/fitness-tracker/',
+  base: '/',
   build: {
     outDir: 'dist',
     rollupOptions: {
