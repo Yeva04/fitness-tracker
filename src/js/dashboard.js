@@ -1,27 +1,6 @@
 import { getLocalStorage, setLocalStorage } from "./utils.js";
 import Chart from "chart.js/auto";
 
-// Calculate calories burned from workouts
-function calculateWorkoutCalories(workouts, date) {
-  const METs = {
-    running: 7,
-    cycling: 6,
-    yoga: 3,
-    "strength training": 6
-  };
-  const users = getLocalStorage("fitness-users") || [];
-  const currentUserEmail = getLocalStorage("current-user");
-  const user = users.find(u => u.email === currentUserEmail);
-  const userWeight = user ? user.weight : 70;
-  return workouts
-    .filter(w => w.date === date)
-    .reduce((sum, w) => {
-      const met = METs[w.name.toLowerCase()] || 5;
-      const hours = w.time / 60;
-      return sum + (met * userWeight * hours);
-    }, 0);
-}
-
 // Fetch Strava access token
 async function fetchStravaToken(code, clientId, clientSecret) {
   const response = await fetch("https://www.strava.com/oauth/token", {
@@ -57,6 +36,26 @@ async function fetchStravaData(accessToken, date) {
   return { steps, caloriesBurned };
 }
 
+// Calculate workout calories
+function calculateWorkoutCalories(workouts, date) {
+  const METs = {
+    running: 7.0,
+    cycling: 6.0,
+    swimming: 6.0,
+    "weight training": 3.5,
+    yoga: 2.5
+  };
+  return workouts
+    .filter(w => w.date === date)
+    .reduce((sum, w) => {
+      const met = METs[w.name.toLowerCase()] || 3.0;
+      const duration = parseInt(w.time, 10) / 60;
+      const user = getLocalStorage("fitness-users")?.find(u => u.email === getLocalStorage("current-user"));
+      const weight = user?.weight || 70;
+      return sum + met * weight * duration;
+    }, 0);
+}
+
 export async function renderDashboard() {
   const workouts = getLocalStorage("fitness-workouts") || [];
   const foods = getLocalStorage("fitness-foods") || [];
@@ -64,33 +63,60 @@ export async function renderDashboard() {
   const tableBody = document.querySelector("#progress-table tbody");
   const canvas = document.getElementById("progress-chart");
   const suggestions = document.getElementById("suggestions");
-  if (!tableBody || !canvas || !suggestions) return;
+  if (!tableBody || !canvas || !suggestions) {
+    console.error("Dashboard elements not found");
+    return;
+  }
+
+  // Sample data for testing if empty
+  const sampleWorkouts = workouts.length ? workouts : [
+    { date: "2025-10-18", name: "Running", time: "30", reps: "0" },
+    { date: "2025-10-19", name: "Cycling", time: "45", reps: "0" }
+  ];
+  const sampleFoods = foods.length ? foods : [
+    { date: "2025-10-18", name: "Apple", calories: 95, protein: 0.5 },
+    { date: "2025-10-19", name: "Chicken", calories: 200, protein: 27 }
+  ];
+  const sampleStrava = stravaData.length ? stravaData : [
+    { date: "2025-10-18", steps: 8000, caloriesBurned: 300 },
+    { date: "2025-10-19", steps: 10000, caloriesBurned: 400 }
+  ];
+
+  // Use sample data if empty
+  const finalWorkouts = workouts.length ? workouts : sampleWorkouts;
+  const finalFoods = foods.length ? foods : sampleFoods;
+  const finalStrava = stravaData.length ? stravaData : sampleStrava;
 
   // Group data by date
-  const dates = [...new Set([...workouts.map(w => w.date), ...foods.map(f => f.date), ...stravaData.map(s => s.date)])].sort();
+  const dates = [...new Set([
+    ...finalWorkouts.map(w => w.date),
+    ...finalFoods.map(f => f.date),
+    ...finalStrava.map(s => s.date)
+  ])].sort();
+
   const workoutCounts = dates.map(date => ({
     date,
-    count: workouts.filter(w => w.date === date).length
+    count: finalWorkouts.filter(w => w.date === date).length
   }));
   const calorieSums = dates.map(date => ({
     date,
-    calories: foods.filter(f => f.date === date).reduce((sum, f) => sum + f.calories, 0)
+    calories: finalFoods.filter(f => f.date === date).reduce((sum, f) => sum + f.calories, 0)
   }));
   const proteinSums = dates.map(date => ({
     date,
-    protein: foods.filter(f => f.date === date).reduce((sum, f) => sum + (f.protein || 0), 0)
+    protein: finalFoods.filter(f => f.date === date).reduce((sum, f) => sum + (f.protein || 0), 0)
   }));
   const workoutCalories = dates.map(date => ({
     date,
-    caloriesBurned: Math.round(calculateWorkoutCalories(workouts, date))
+    caloriesBurned: Math.round(calculateWorkoutCalories(finalWorkouts, date))
   }));
   const stepCounts = dates.map(date => ({
     date,
-    steps: stravaData.find(s => s.date === date)?.steps || 0
+    steps: finalStrava.find(s => s.date === date)?.steps || 0
   }));
   const stravaCalories = dates.map(date => ({
     date,
-    caloriesBurned: stravaData.find(s => s.date === date)?.caloriesBurned || 0
+    caloriesBurned: finalStrava.find(s => s.date === date)?.caloriesBurned || 0
   }));
 
   // Update table
@@ -106,7 +132,7 @@ export async function renderDashboard() {
     </tr>
   `).join("");
 
-  // Render forex-style line chart
+  // Render forex-style line chart with visible lines
   if (window.progressChart) window.progressChart.destroy();
   window.progressChart = new Chart(canvas, {
     type: "line",
@@ -117,6 +143,7 @@ export async function renderDashboard() {
           label: "Workouts",
           data: workoutCounts.map(w => w.count),
           borderColor: "#4CAF50",
+          borderWidth: 2,
           pointRadius: 0,
           fill: false,
           tension: 0.1
@@ -125,6 +152,7 @@ export async function renderDashboard() {
           label: "Calories Consumed",
           data: calorieSums.map(c => c.calories),
           borderColor: "#F44336",
+          borderWidth: 2,
           pointRadius: 0,
           fill: false,
           tension: 0.1
@@ -133,6 +161,7 @@ export async function renderDashboard() {
           label: "Protein Retained (g)",
           data: proteinSums.map(p => p.protein),
           borderColor: "#26A69A",
+          borderWidth: 2,
           pointRadius: 0,
           fill: false,
           tension: 0.1
@@ -141,6 +170,7 @@ export async function renderDashboard() {
           label: "Workout Calories Burned",
           data: workoutCalories.map(w => w.caloriesBurned),
           borderColor: "#9C27B0",
+          borderWidth: 2,
           pointRadius: 0,
           fill: false,
           tension: 0.1
@@ -149,6 +179,7 @@ export async function renderDashboard() {
           label: "Steps",
           data: stepCounts.map(s => s.steps),
           borderColor: "#2196F3",
+          borderWidth: 2,
           pointRadius: 0,
           fill: false,
           tension: 0.1
@@ -157,6 +188,7 @@ export async function renderDashboard() {
           label: "Strava Calories Burned",
           data: stravaCalories.map(c => c.caloriesBurned),
           borderColor: "#FF9800",
+          borderWidth: 2,
           pointRadius: 0,
           fill: false,
           tension: 0.1
@@ -173,6 +205,11 @@ export async function renderDashboard() {
           callbacks: {
             label: context => `${context.dataset.label}: ${context.parsed.y}`
           }
+        },
+        legend: {
+          display: true,
+          position: "top",
+          labels: { color: "#333", font: { size: 12 } }
         }
       },
       interaction: {
@@ -182,7 +219,7 @@ export async function renderDashboard() {
       scales: {
         x: {
           grid: { display: true, color: "#33333333" },
-          ticks: { color: "#333" }
+          ticks: { color: "#333", maxRotation: 45, autoSkip: true }
         },
         y: {
           beginAtZero: true,
@@ -194,11 +231,11 @@ export async function renderDashboard() {
   });
 
   // Export data
-  document.getElementById("export-data").addEventListener("click", () => {
+  document.getElementById("export-data")?.addEventListener("click", () => {
     const data = {
-      workouts: workouts,
-      foods: foods,
-      strava: stravaData,
+      workouts: finalWorkouts,
+      foods: finalFoods,
+      strava: finalStrava,
       goals: getLocalStorage("fitness-goals") || []
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -214,8 +251,8 @@ export async function renderDashboard() {
   const stravaButton = document.getElementById("fetch-strava");
   if (stravaButton) {
     stravaButton.addEventListener("click", async () => {
-      const clientId = "181326"; // Update with your ID
-      const basePath = import.meta.env.BASE_URL || '/';
+      const clientId = "YOUR_STRAVA_CLIENT_ID"; // Replace with your ID
+      const basePath = import.meta.env.BASE_URL || '/fitness-tracker/';
       const redirectUri = `${window.location.origin}${basePath}dashboard.html`;
       const scopes = "activity:read";
       const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes}`;
@@ -227,10 +264,10 @@ export async function renderDashboard() {
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get("code");
   if (code) {
-    const clientId = "181326"; // Update with your ID
-    const clientSecret = "b56548268d38fa55e9a747ad54bd541d456b0522"; // Update with your secret
+    const clientId = "YOUR_STRAVA_CLIENT_ID"; // Replace with your ID
+    const clientSecret = "YOUR_STRAVA_CLIENT_SECRET"; // Replace with your secret
     const date = new Date().toISOString().split("T")[0];
-    const basePath = import.meta.env.BASE_URL || '/';
+    const basePath = import.meta.env.BASE_URL || '/fitness-tracker/';
     try {
       const tokenData = await fetchStravaToken(code, clientId, clientSecret);
       const stravaData = await fetchStravaData(tokenData.access_token, date);

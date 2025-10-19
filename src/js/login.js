@@ -1,35 +1,32 @@
 import { getLocalStorage, setLocalStorage } from "./utils.js";
 
+console.log("login.js loaded");
+
 export function initializeLogin() {
+  console.log("initializeLogin called");
+
   const loginForm = document.getElementById("login-form");
   const signupForm = document.getElementById("signup-form");
   const signupModal = document.getElementById("signup-modal");
   const showSignup = document.getElementById("show-signup");
   const modalClose = document.querySelector("#signup-modal .modal-close");
 
-  // Debug: Log element detection
-  console.log("loginForm:", loginForm);
-  console.log("signupForm:", signupForm);
-  console.log("signupModal:", signupModal);
-  console.log("showSignup:", showSignup);
-  console.log("modalClose:", modalClose);
+  console.log("Elements:", { loginForm, signupForm, signupModal, showSignup, modalClose });
 
   if (!loginForm || !signupForm || !signupModal || !showSignup || !modalClose) {
     console.error("One or more form elements not found");
+    alert("Form setup error. Please contact support.");
     return;
   }
 
-  // Ensure signup modal is hidden on load
   signupModal.classList.remove("show");
   signupModal.style.display = "none";
-  console.log("Ensured signup modal is hidden on load");
+  console.log("Signup modal hidden");
 
-  // Set base path for navigation
-  const basePath = import.meta.env.BASE_URL || '/';
-  const dashboardUrl = `${basePath}dashboard.html`;
-  console.log("dashboardUrl set to:", dashboardUrl);
+  const basePath = import.meta.env.BASE_URL || '/fitness-tracker/';
+  const dashboardUrl = `${basePath}dashboard.html`.replace('//', '/');
+  console.log("Base path:", basePath, "Dashboard URL:", dashboardUrl);
 
-  // Show sign-up modal
   showSignup.addEventListener("click", (e) => {
     e.preventDefault();
     console.log("Show signup clicked");
@@ -37,15 +34,13 @@ export function initializeLogin() {
     signupModal.style.display = "flex";
   });
 
-  // Close modal
-  modalClose.addEventListener("click", (e) => {
+  modalClose.addEventListener("click", () => {
     console.log("Modal close clicked");
     signupModal.classList.remove("show");
     signupModal.style.display = "none";
     signupForm.reset();
   });
 
-  // Sign-up form submission
   signupForm.addEventListener("submit", (e) => {
     e.preventDefault();
     console.log("Signup form submitted");
@@ -70,31 +65,36 @@ export function initializeLogin() {
       return;
     }
 
-    // Clear previous user data for clean slate
-    localStorage.removeItem("workout-data");
-    localStorage.removeItem("nutrition-data");
-    localStorage.removeItem("goal-data");
-    localStorage.removeItem("dashboard-data");
-    console.log("Cleared previous user data for clean slate");
-
     const user = { username, email, gender, height, weight };
-    users.push(user);
-    setLocalStorage("fitness-users", users);
-    setLocalStorage("current-user", email);
-    console.log("User registered:", user);
+    try {
+      setLocalStorage("fitness-users", users.concat(user));
+      setLocalStorage("current-user", email);
+      console.log("User registered:", user);
+      console.log("localStorage:", {
+        "fitness-users": getLocalStorage("fitness-users"),
+        "current-user": getLocalStorage("current-user")
+      });
+    } catch (error) {
+      console.error("localStorage set failed:", error);
+      alert("Failed to save user data.");
+      return;
+    }
+
+    signupForm.reset();
     signupModal.classList.remove("show");
     signupModal.style.display = "none";
-    signupForm.reset();
-    try {
-      console.log("Redirecting to:", dashboardUrl);
-      window.location.replace(dashboardUrl);
-    } catch (error) {
-      console.error("Redirect failed:", error);
-      alert("Redirect failed. Please try again.");
-    }
+
+    console.log("Attempting redirect to:", dashboardUrl);
+    window.location.href = dashboardUrl;
+    setTimeout(() => {
+      console.log("Checking redirect, current URL:", window.location.href);
+      if (!window.location.href.includes("dashboard.html")) {
+        console.warn("Redirect failed, forcing to:", dashboardUrl);
+        window.location.assign(dashboardUrl);
+      }
+    }, 1000);
   });
 
-  // Login form submission
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
     console.log("Login form submitted");
@@ -109,25 +109,38 @@ export function initializeLogin() {
     }
 
     const users = getLocalStorage("fitness-users") || [];
+    console.log("Stored users:", users);
     const user = users.find(u => u.username === username && u.email === email);
     if (user) {
-      setLocalStorage("current-user", email);
-      console.log("Login successful for:", email);
       try {
-        console.log("Redirecting to:", dashboardUrl);
-        window.location.replace(dashboardUrl);
+        setLocalStorage("current-user", email);
+        console.log("Login successful, current-user:", email);
+        console.log("localStorage:", {
+          "fitness-users": getLocalStorage("fitness-users"),
+          "current-user": getLocalStorage("current-user")
+        });
       } catch (error) {
-        console.error("Redirect failed:", error);
-        alert("Redirect failed. Please try again.");
+        console.error("localStorage set failed:", error);
+        alert("Failed to save login data.");
+        return;
       }
+      console.log("Attempting redirect to:", dashboardUrl);
+      window.location.href = dashboardUrl;
+      setTimeout(() => {
+        console.log("Checking redirect, current URL:", window.location.href);
+        if (!window.location.href.includes("dashboard.html")) {
+          console.warn("Redirect failed, forcing to:", dashboardUrl);
+          window.location.assign(dashboardUrl);
+        }
+      }, 1000);
     } else {
-      console.warn("Login failed: Invalid credentials");
+      console.warn("Login failed: Invalid username or email");
       alert("Invalid username or email.");
     }
   });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM content loaded, initializing login");
+  console.log("DOM loaded, initializing login");
   initializeLogin();
 });

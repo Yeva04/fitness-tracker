@@ -32,7 +32,7 @@ export function renderNutrition() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-app-id": "efe14923", 
+          "x-app-id": "efe14923",
           "x-app-key": "e70d98121a97c0a5b49fc3066326871f" 
         },
         body: JSON.stringify({ query: foodName })
@@ -58,12 +58,14 @@ export function renderNutrition() {
       foods.push(newFood);
       setLocalStorage("fitness-foods", foods);
 
-      nutritionList.innerHTML += `
+      // Re-render the full list to avoid duplicates
+      nutritionList.innerHTML = foods.map(food => `
         <li>
-          ${foodName}: ${calories} calories, ${protein}g protein
-          <button class="delete-food" data-date="${date}" data-name="${foodName}">Delete</button>
+          ${food.name}: ${food.calories} calories, ${food.protein}g protein
+          <button class="delete-food" data-date="${food.date}" data-name="${food.name}">Delete</button>
         </li>
-      `;
+      `).join("");
+
       nutritionForm.reset();
     } catch (error) {
       console.error("Nutritionix fetch error:", error.message);

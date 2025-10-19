@@ -1,7 +1,20 @@
 export function getLocalStorage(key) {
-  return JSON.parse(localStorage.getItem(key));
+  try {
+    const data = localStorage.getItem(key);
+    console.log(`getLocalStorage(${key}):`, data);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error(`getLocalStorage(${key}) failed:`, error);
+    return null;
+  }
 }
 
-export function setLocalStorage(key, data) {
-  localStorage.setItem(key, JSON.stringify(data));
+export function setLocalStorage(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    console.log(`setLocalStorage(${key}):`, value);
+  } catch (error) {
+    console.error(`setLocalStorage(${key}) failed:`, error);
+    throw error;
+  }
 }

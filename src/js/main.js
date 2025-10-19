@@ -9,10 +9,12 @@ export function initializeApp() {
 
   // Check if user is logged in
   const currentUser = getLocalStorage("current-user");
+  console.log("Current user:", currentUser);
   if (!currentUser) {
-    const basePath = import.meta.env.BASE_URL || '/';
-    console.log("No user found, redirecting to login");
-    window.location.href = `${basePath}index.html`;
+    const basePath = import.meta.env.BASE_URL || '/fitness-tracker/';
+    const loginUrl = `${basePath}index.html`.replace('//', '/');
+    console.log("No user found, redirecting to:", loginUrl);
+    window.location.href = loginUrl;
     return;
   }
 
@@ -38,6 +40,7 @@ export function initializeApp() {
     console.error("Error: Hamburger or nav-menu not found");
   }
 
+  
   // Navigation button handling
   if (navButtons.length && sections.length) {
     navButtons.forEach(button => {

@@ -8,6 +8,7 @@ export function renderWorkout() {
     return;
   }
 
+  
   // Load existing workouts
   const workouts = getLocalStorage("fitness-workouts") || [];
   workoutList.innerHTML = workouts.map(workout => `

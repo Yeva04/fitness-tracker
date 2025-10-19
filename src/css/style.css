@@ -134,6 +134,7 @@ form input, form select {
   border-radius: 5px;
 }
 
+
 form button, #export-data, #fetch-strava {
   background: linear-gradient(45deg, #F44336, #4CAF50);
   color: white;
@@ -344,6 +345,7 @@ th {
     flex-direction: column;
   }
 
+  
   #progress-chart {
     max-width: 600px;
   }
