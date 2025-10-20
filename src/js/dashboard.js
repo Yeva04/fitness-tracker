@@ -251,11 +251,12 @@ export async function renderDashboard() {
   const stravaButton = document.getElementById("fetch-strava");
   if (stravaButton) {
     stravaButton.addEventListener("click", async () => {
-      const clientId = "YOUR_STRAVA_CLIENT_ID"; // Replace with your ID
+      const clientId = "181326"; 
       const basePath = import.meta.env.BASE_URL || '/fitness-tracker/';
       const redirectUri = `${window.location.origin}${basePath}dashboard.html`;
       const scopes = "activity:read";
       const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scopes}`;
+      console.log("Redirecting to Strava auth:", authUrl);
       window.location.href = authUrl;
     });
   }
@@ -274,6 +275,7 @@ export async function renderDashboard() {
       const stravaItems = getLocalStorage("fitness-strava") || [];
       stravaItems.push({ date, steps: stravaData.steps, caloriesBurned: stravaData.caloriesBurned });
       setLocalStorage("fitness-strava", stravaItems);
+      console.log("Strava data saved:", stravaData);
       window.history.replaceState({}, document.title, `${basePath}dashboard.html`);
       renderDashboard();
     } catch (error) {
