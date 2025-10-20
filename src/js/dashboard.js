@@ -264,8 +264,8 @@ export async function renderDashboard() {
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get("code");
   if (code) {
-    const clientId = "YOUR_STRAVA_CLIENT_ID"; // Replace with your ID
-    const clientSecret = "YOUR_STRAVA_CLIENT_SECRET"; // Replace with your secret
+    const clientId = "181326"; 
+    const clientSecret = "b56548268d38fa55e9a747ad54bd541d456b0522"; 
     const date = new Date().toISOString().split("T")[0];
     const basePath = import.meta.env.BASE_URL || '/fitness-tracker/';
     try {
